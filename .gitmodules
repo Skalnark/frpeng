@@ -1,0 +1,3 @@
+[submodule "reactive-banana"]
+	path = reactive-banana
+	url = git://github.com/HeinrichApfelmus/reactive-banana.git
