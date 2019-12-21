@@ -17,7 +17,7 @@ offset = 10
 background :: Color
 background = black
 
--- | Data describing the state of the pong game. 
+-- | Data describing the state of the pong game.
 data PongGame =
   Game
     { ballLoc :: (Float, Float) -- ^ posição
