@@ -1,18 +1,13 @@
 module Renderer
-  ( window
+  ( staticWindow
   ) where
 
-import Graphics.Gloss as G
+import           Graphics.Gloss as G
+import           Shapes
 
-type Size = (Int, Int)
-
-type Position3D = (Int, Int, Int)
-
-type Position2D = (Int, Int)
-
-window :: String -> Size -> Position2D -> Display
-window "" size pos = window "NewWindow" size pos
-window title (x, y) pos
+staticWindow :: String -> Size -> Position2D -> Display
+staticWindow "" size pos = staticWindow "NewWindow" size pos
+staticWindow title (x, y) pos
   | x <= 0 || y <= 0 = renderExact' title (100, 100) pos
   | otherwise = renderExact' title (x, y) pos
   where
