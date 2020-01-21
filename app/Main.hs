@@ -1,10 +1,11 @@
 module Main where
 
-import           Graphics.Gloss               as G
-import           Graphics.Gloss.Data.ViewPort as GV
+import          qualified Graphics.Gloss                     as G
+import          Graphics.Gloss.Data.ViewPort       as GV
+import         Graphics.Gloss.Interface.Pure.Game as Game
 
-import           Renderer
-import           Shapes
+import Primitive
+import Shapes
 
 -- | Presets
 paddleColor = light (light blue)
@@ -22,7 +23,7 @@ fps = 60
 ballSpeed :: Float
 ballSpeed = 250
 
-background :: Color
+background :: Game.Color
 background = black
 
 -- | Data describing the state of the pong game.
@@ -45,6 +46,9 @@ moveBall seconds game = game {ballLoc = (x', y')}
     x' = x + vx * seconds
     y' = y + vy * seconds
 
+window :: Game.Display
+window = G.InWindow "Window" (width, height) (offset, offset)
+
 initialState :: PongGame
 initialState =
   Game
@@ -57,7 +61,7 @@ initialState =
 
 render ::
      PongGame -- ^ Estado do jogo pra renderizar
-  -> Picture -- ^ Uma imagem desse estado
+  -> Game.Picture -- ^ Uma imagem desse estado
 render game =
   pictures
     [ ball
@@ -70,19 +74,19 @@ render game =
     ball = uncurry translate (ballLoc game) $ color ballColor $ circleSolid 10
     ballColor = dark red
   --  as paredes de cima e de baixo
-    wall :: Float -> Picture
+    wall :: Float -> Game.Picture
     wall offset = translate 0 offset $ color wallColor $ rectangleSolid 300 10
     wallColor = greyN 0.5
     walls = pictures [wall 150, wall (-150)]
   --  Faz uma das palhetas
-    mkPaddle :: Color -> Float -> Float -> Picture
+    mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
     mkPaddle col x y =
       pictures
         [ translate x y $ color col $ rectangleSolid 26 86
         , translate x y $ color paddleColor $ rectangleSolid 20 80
         ]
 
-drawing :: Picture
+drawing :: Game.Picture
 drawing =
   pictures [ball, walls, mkPaddle rose 120 (-20), mkPaddle orange (-120) 40]
   where
@@ -90,12 +94,12 @@ drawing =
     ball = translate (-10) 40 $ color ballColor $ circleSolid 10
     ballColor = dark red
     --  as paredes
-    wall :: Float -> Picture
+    wall :: Float -> Game.Picture
     wall offset = translate 0 offset $ color wallColor $ rectangleSolid 270 10
     wallColor = greyN 0.5
     walls = pictures [wall 150, wall (-150)]
     --  as palhetas
-    mkPaddle :: Color -> Float -> Float -> Picture
+    mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
     mkPaddle col x y =
       pictures
         [ translate x y $ color col $ rectangleSolid 26 86
@@ -103,8 +107,8 @@ drawing =
         ]
 
 -- | Atualiza o jogo movendo a bola e implementando o bounce
-update :: GV.ViewPort -> Float -> PongGame -> PongGame
-update _ seconds = wallBounce . moveBall seconds
+update :: Float -> PongGame -> PongGame
+update seconds = wallBounce . moveBall seconds
 
 -- | Detecta colisão com a palheta e quando colidir altera a
 -- velocidade da bola pra simular uma bola quicando
@@ -133,13 +137,12 @@ wallCollision (_, y) radius = topCollision || bottomCollision
     topCollision = y - radius <= -fromIntegral width / 2
     bottomCollision = y + radius >= fromIntegral width / 2
 
+-- | Respond to key events.
+handleKeys :: Game.Event -> PongGame -> PongGame
+-- For an 's' keypress, reset the ball to the center.
+handleKeys (Game.EventKey (Game.Char 's') _ _ _) game = game {ballLoc = (0, 0)}
+-- Do nothing for all other events.
+handleKeys _ game                           = game
+
 main :: IO ()
-main = do
-  G.simulate
-    (staticWindow "Window" (width, height) (offset, offset))
-    background
-    fps
-    initialState
-    render
-    update
-  print "yay"
+main = Game.play window background fps initialState render handleKeys update
