@@ -1,43 +1,37 @@
-name:                frpeng
-version:             0.1.0.0
-github:              "githubuser/frpeng"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
-
+library:
+  source-dirs: src
+tests:
+  frpeng-test:
+    source-dirs: test
+    main: Spec.hs
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - frpeng
+copyright: 2019 Author name here
+maintainer: example@example.com
+dependencies:
+- gloss
+- base >= 4.7 && < 5
+- reactive-banana
+name: frpeng
+version: 0.1.0.0
 extra-source-files:
 - README.md
 - ChangeLog.md
-description:         Please see the README on GitHub at <https://github.com/githubuser/frpeng#readme>
-
-dependencies:
-- base >= 4.7 && < 5
-- gloss
-- reactive-banana
-
-
-library:
-  source-dirs: src
-
+author: Author name here
+github: githubuser/frpeng
+license: BSD3
 executables:
   frpeng-exe:
-    main:                Main.hs
-    source-dirs:         app
+    source-dirs: app
+    main: Main.hs
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - frpeng
-
-tests:
-  frpeng-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - frpeng
+description: Please see the README on GitHub at <https://github.com/githubuser/frpeng#readme>

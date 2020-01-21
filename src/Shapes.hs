@@ -10,7 +10,7 @@ type Width = Float
 
 type Height = Float
 
-solidCircle :: Radius -> Picture
+solidCircle :: Float -> Picture
 solidCircle f = circle f
 
 rectangle :: Width -> Height -> Picture

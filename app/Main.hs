@@ -1,14 +1,137 @@
 module Main where
 
-import          qualified Graphics.Gloss                     as G
-import          Graphics.Gloss.Data.ViewPort       as GV
-import         Graphics.Gloss.Interface.Pure.Game as Game
+import qualified Graphics.Gloss                as G
+import qualified Graphics.Gloss.Data.ViewPort  as GV
+import qualified Graphics.Gloss.Interface.Pure.Game
+                                               as Game
 
-import Primitive
-import Shapes
+import           Primitive                     as P
+import           Renderer
+import           Shapes
+
+main :: IO ()
+main = Game.play window background fps initialState picture handleKeys update
+
+sprites game = [change ball, walls, rosePaddle game, orangePaddle game]
+
+data GameState = Game { ballLoc :: Vector -- ^ posição
+                      , ballVel :: Vector -- ^ velocidade da bola
+                      , player1 :: Float -- ^ posição do player esquerdo
+                      , player2 :: Float -- ^ posição do player direito
+                      }
+
+rosePaddle game = mkPaddle Game.rose 120 $ player1 game
+orangePaddle game = mkPaddle Game.orange (-120) $ player2 game
+
+wall :: Float -> Game.Picture
+wall offset =
+  Game.translate 0 offset $ Game.color wallColor $ Game.rectangleSolid 300 10
+walls = Game.pictures [wall 150, wall (-150)]
+
+
+ball = Object
+  { render = Render { sprite = Game.color ballColor $ Game.circleSolid ballSize, name = "Bola" }
+  , space  = Space { position = (0, 0)
+                   , rotation = (0, 0)
+                   , size     = (ballSize, ballSize)
+                   }
+  , body   = Body { collider = Circle ballSize
+                  , mass     = 1.0
+                  , velocity = [(0.0, 0.0)]
+                  , isSolid  = True
+                  }
+  }
+
+--ballMove game = uncurry Game.translate (calcVelocity (body ball))
+ballColor = Game.dark Game.red
+wallColor = Game.greyN 0.5
+ballSize = 10.0
+
+mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
+mkPaddle col x y = Game.pictures
+  [ Game.translate x y $ Game.color col $ Game.rectangleSolid 26 86
+  , Game.translate x y $ Game.color paddleColor $ Game.rectangleSolid 20 80
+  ]
+
+initialState :: GameState
+initialState = Game { ballLoc = (-10, 30)
+                    , ballVel = (ballSpeed * 0.05, ballSpeed)
+                    , player1 = 40
+                    , player2 = -80
+                    }
+
+--------------------------------------------------------------------
+
+change :: Object -> Sprite
+change ob = sprite $ render ob
+
+picture game = Game.pictures $ sprites game
+
+drawing :: Game.Picture
+drawing = Game.pictures
+  [ball, walls, mkPaddle Game.rose 120 (-20), mkPaddle Game.orange (-120) 40]
+ where
+    --  A bola
+  ball = Game.translate (-10) 40 $ Game.color ballColor $ Game.circleSolid 10
+  ballColor = Game.dark Game.red
+  --  as pa Game.redes
+  wall :: Float -> Game.Picture
+  wall offset =
+    Game.translate 0 offset $ Game.color wallColor $ Game.rectangleSolid 270 10
+  walls = Game.pictures [wall 150, wall (-150)]
+  --  as palhetas
+  mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
+  mkPaddle col x y = Game.pictures
+    [ Game.translate x y $ Game.color col $ Game.rectangleSolid 26 86
+    , Game.translate x y $ Game.color paddleColor $ Game.rectangleSolid 20 80
+    ]
+
+-- | Atualiza o jogo movendo a bola e implementando o bounce
+update :: Float -> GameState -> GameState
+update seconds = wallBounce . moveBall seconds
+
+-- | Detecta colisão com a palheta e quando colidir altera a
+-- velocidade da bola pra simular uma bola quicando
+-- paddleBounce :: GameState -> GameState
+-- | Mesmo que o paddleBounce, com a diferença que esse é em
+-- relação a pa Game.rede
+wallBounce :: GameState -> GameState
+wallBounce game = game { ballVel = (vx, vy') }
+    -- O mesmo raio do render
+
+
+
+
+
+
+ where
+  radius :: Int
+  radius   = 10
+  -- A velocidade anterior em relação a atual
+  (vx, vy) = ballVel game
+  vy'      = if wallCollision (ballLoc game) (fromIntegral radius)
+                    -- Atualiza a velocidade
+    then -vy
+                   -- Se não, não faça nada
+    else vy
+
+-- | Dada a posição e a colisão da bola, retorna o resultado da colisão
+wallCollision :: (Float, Float) -> Float -> Bool
+wallCollision (_, y) radius = topCollision || bottomCollision
+ where
+  topCollision    = y - radius <= -fromIntegral width / 2
+  bottomCollision = y + radius >= fromIntegral width / 2
+
+-- | Respond to key events.
+handleKeys :: Game.Event -> GameState -> GameState
+-- For an 's' keypress, reset the ball to the center.
+handleKeys (Game.EventKey (Game.Char 's') _ _ _) game =
+  game { ballLoc = (0, 0) }
+-- Do nothing for all other events.
+handleKeys _ game = game
 
 -- | Presets
-paddleColor = light (light blue)
+paddleColor = Game.light (Game.light Game.blue)
 
 width, height, offset :: Int
 width = 300
@@ -24,125 +147,17 @@ ballSpeed :: Float
 ballSpeed = 250
 
 background :: Game.Color
-background = black
+background = Game.black
 
--- | Data describing the state of the pong game.
-data PongGame =
-  Game
-    { ballLoc :: (Float, Float) -- ^ posição
-    , ballVel :: (Float, Float) -- ^ velocidade da bola
-    , player1 :: Float -- ^ Player esquerdo
-    , player2 :: Float -- ^ Player direito
-    }
-  deriving (Show) -- | Estado Inicial do pong
-
-moveBall :: Float -> PongGame -> PongGame
-moveBall seconds game = game {ballLoc = (x', y')}
+moveBall :: Float -> GameState -> GameState
+moveBall seconds game = game { ballLoc = (x', y') }
     -- Old locations and velocities.
-  where
-    (x, y) = ballLoc game
-    (vx, vy) = ballVel game
-    -- New locations.
-    x' = x + vx * seconds
-    y' = y + vy * seconds
+ where
+  (x , y ) = ballLoc game
+  (vx, vy) = ballVel game
+  -- New locations.
+  x'       = x + vx * seconds
+  y'       = y + vy * seconds                               
 
 window :: Game.Display
 window = G.InWindow "Window" (width, height) (offset, offset)
-
-initialState :: PongGame
-initialState =
-  Game
-    { ballLoc = (-10, 30)
-    , ballVel = (ballSpeed * 0.05, ballSpeed * 1)
-    , player1 = 40
-    , player2 = -80
-    }
-  -- | Função que converte o estado do jogo em uma imagem
-
-render ::
-     PongGame -- ^ Estado do jogo pra renderizar
-  -> Game.Picture -- ^ Uma imagem desse estado
-render game =
-  pictures
-    [ ball
-    , walls
-    , mkPaddle rose 120 $ player1 game
-    , mkPaddle orange (-120) $ player2 game
-    ]
-    -- a bola
-  where
-    ball = uncurry translate (ballLoc game) $ color ballColor $ circleSolid 10
-    ballColor = dark red
-  --  as paredes de cima e de baixo
-    wall :: Float -> Game.Picture
-    wall offset = translate 0 offset $ color wallColor $ rectangleSolid 300 10
-    wallColor = greyN 0.5
-    walls = pictures [wall 150, wall (-150)]
-  --  Faz uma das palhetas
-    mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
-    mkPaddle col x y =
-      pictures
-        [ translate x y $ color col $ rectangleSolid 26 86
-        , translate x y $ color paddleColor $ rectangleSolid 20 80
-        ]
-
-drawing :: Game.Picture
-drawing =
-  pictures [ball, walls, mkPaddle rose 120 (-20), mkPaddle orange (-120) 40]
-  where
-    --  A bola
-    ball = translate (-10) 40 $ color ballColor $ circleSolid 10
-    ballColor = dark red
-    --  as paredes
-    wall :: Float -> Game.Picture
-    wall offset = translate 0 offset $ color wallColor $ rectangleSolid 270 10
-    wallColor = greyN 0.5
-    walls = pictures [wall 150, wall (-150)]
-    --  as palhetas
-    mkPaddle :: Game.Color -> Float -> Float -> Game.Picture
-    mkPaddle col x y =
-      pictures
-        [ translate x y $ color col $ rectangleSolid 26 86
-        , translate x y $ color paddleColor $ rectangleSolid 20 80
-        ]
-
--- | Atualiza o jogo movendo a bola e implementando o bounce
-update :: Float -> PongGame -> PongGame
-update seconds = wallBounce . moveBall seconds
-
--- | Detecta colisão com a palheta e quando colidir altera a
--- velocidade da bola pra simular uma bola quicando
--- paddleBounce :: PongGame -> PongGame
--- | Mesmo que o paddleBounce, com a diferença que esse é em
--- relação a parede
-wallBounce :: PongGame -> PongGame
-wallBounce game = game {ballVel = (vx, vy')}
-    -- O mesmo raio do render
-  where
-    radius :: Int
-    radius = 10
-    -- A velocidade anterior em relação a atual
-    (vx, vy) = ballVel game
-    vy' =
-      if wallCollision (ballLoc game) (fromIntegral radius)
-             -- Atualiza a velocidade
-        then -vy
-            -- Se não, não faça nada
-        else vy
-
--- | Dada a posição e a colisão da bola, retorna o resultado da colisão
-wallCollision :: (Float, Float) -> Radius -> Bool
-wallCollision (_, y) radius = topCollision || bottomCollision
-  where
-    topCollision = y - radius <= -fromIntegral width / 2
-    bottomCollision = y + radius >= fromIntegral width / 2
-
--- | Respond to key events.
-handleKeys :: Game.Event -> PongGame -> PongGame
--- For an 's' keypress, reset the ball to the center.
-handleKeys (Game.EventKey (Game.Char 's') _ _ _) game = game {ballLoc = (0, 0)}
--- Do nothing for all other events.
-handleKeys _ game                           = game
-
-main :: IO ()
-main = Game.play window background fps initialState render handleKeys update
