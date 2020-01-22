@@ -1,18 +1,19 @@
 module Shapes
   ( rectangle
   , solidCircle
-  ) where
+  )
+where
 
 import           Graphics.Gloss
-import Primitive
+import           Primitive
 
 type Width = Float
 
 type Height = Float
 
 solidCircle :: Float -> Picture
-solidCircle f = circle f
+solidCircle = circle
 
-rectangle :: Width -> Height -> Picture
+rectangle :: Float -> Float -> [Primitive.Point]
 rectangle w h =
-  polygon [(-w / 2, h / 2), (w / 2, h / 2), (w / 2, -h / 2), (-w / 2, -h / 2)]
+  [(-w / 2, h / 2), (w / 2, h / 2), (w / 2, -h / 2), (-w / 2, -h / 2)]

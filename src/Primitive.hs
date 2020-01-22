@@ -4,13 +4,15 @@ module Primitive
   , Space(..)
   , Body(..)
   , Collider(..)
+  , GameState
+  , Action
   , Sprite
   , Vector
   , Point
   , Force
+  , render
   , setName
   , setSprite
-  , translate
   , rotate
   , resize
   , shear
@@ -18,18 +20,14 @@ module Primitive
   , setVelocity
   , setMass
   , setSolidity
-  , calcVelocity
-  , (===)
-  , (<->)
-  , (<=>)
-  , rd
-  , bd
-  , sp
-  , hasWeight
-  ) where
+  , act
+  )
+where
 
-import           GameObject
-import qualified Graphics.Gloss as Gloss
+import qualified Graphics.Gloss                as Gloss
+import qualified Graphics.Gloss.Geometry.Angle as GMath
+
+type GameState = [Object]
 
 type Vector = (Float, Float)
 
@@ -41,15 +39,15 @@ type Sprite = Gloss.Picture
 
 type Force = [Vector]
 
-type Behavior = [Object -> Object]
+type Action = (Float -> Object -> Object)
 
 -- | The main game object
 data Object =
   Object
-    { render    :: Render
+    { renderer  :: Render
     , space     :: Space
     , body      :: Body
-    , behaviors :: Behavior
+    , actions :: [Action]
     }
 
 -- Rendering
@@ -64,7 +62,7 @@ data Render =
 data Space =
   Space
     { position :: Vector
-    , rotation :: Vector
+    , rotation :: Float
     , size     :: Vector
     }
   deriving (Show, Eq)
@@ -80,106 +78,68 @@ data Body =
   deriving (Show, Eq)
 
 data Collider
-  = Poligon [Point]
+  = Polygon [Point]
   | Circle Float
-  | Elipse Vector
+  | Elipse Float Float
   deriving (Show, Eq)
 
-(<->) :: (p -> Render -> Render) -> p -> Object -> Object
-(<->) f v (Object r s b bh) =
-  Object {render = r', space = s, body = b, behaviors = bh}
-  where
-    r' = f v r
+render :: Object -> Sprite
+render (Object (Render sp _) (Space (px, py) rot (sx, sy)) b bh) =
+  Gloss.translate px py (Gloss.rotate rot (Gloss.scale sx sy sp))
 
-rd = (<->)
-
-(<=>) :: (p -> Body -> Body) -> p -> Object -> Object
-(<=>) f v (Object r s b bh) =
-  Object {render = r, space = s, body = b', behaviors = bh}
-  where
-    b' = f v b
-
-bd = (<=>)
-
-(===) :: (p -> Space -> Space) -> p -> Object -> Object
-(===) f v (Object r s b bh) =
-  Object {render = r, space = s', body = b, behaviors = bh}
-  where
-    s' = f v s
-
-sp = (===)
+act :: Float -> Object -> Object
+act sec (Object r s bd bh) = act' sec bh (Object r s bd bh)
+ where
+  act' :: Float -> [Action] -> Object -> Object
+  act' sec []       obj = obj
+  act' sec (b : bs) obj = act' sec bs (b sec obj)
 
 setName :: String -> Render -> Render
-setName val (Render s _) = Render {sprite = s, name = val}
-
-apply = setName <-> "Yay"
+setName val (Render s _) = Render { sprite = s, name = val }
 
 setSprite :: Sprite -> Render -> Render
-setSprite val (Render _ n) = Render {sprite = val, name = n}
+setSprite val (Render _ n) = Render { sprite = val, name = n }
 
 setPosition :: Vector -> Space -> Space
-setPosition val (Space _ r s) = Space {position = val, rotation = r, size = s}
+setPosition val (Space _ r s) =
+  Space { position = val, rotation = r, size = s }
 
-translate :: Float -> Object -> Object
-translate sec (Object r s b bh) =
-  Object {render = r, space = s', body = b, behaviors = bh}
-  where
-    s' =
-      let p = position s
-          v = resultantForce (velocity b)
-       in Space {position = (vec p v), rotation = rotation s, size = size s}
-
-rotate :: Vector -> Space -> Space
-rotate val (Space p _ s) = Space {position = p, rotation = val, size = s}
+rotate :: Float -> Space -> Space
+rotate val (Space p _ s) = Space { position = p, rotation = val, size = s }
 
 shear :: Vector -> Space -> Space
-shear (x1, y1) (Space p r (x, y)) = Space {position = p, rotation = r, size = s}
-  where
-    s = (x * x1, y * y1)
+shear (x1, y1) (Space p r (x, y)) = Space { position = p
+                                          , rotation = r
+                                          , size     = s
+                                          }
+  where s = (x * x1, y * y1)
 
 resize :: Float -> Space -> Space
-resize factor (Space p r (x, y)) = Space {position = p, rotation = r, size = s}
-  where
-    s = (factor * x, factor * y)
+resize factor (Space p r (x, y)) = Space { position = p
+                                         , rotation = r
+                                         , size     = s
+                                         }
+  where s = (factor * x, factor * y)
 
 setCollider :: Collider -> Body -> Body
 setCollider val (Body _ m v i) =
-  Body {collider = val, mass = m, velocity = v, isSolid = i}
+  Body { collider = val, mass = m, velocity = v, isSolid = i }
 
 setMass :: Float -> Body -> Body
 setMass val (Body c _ v i) =
-  Body {collider = c, mass = val, velocity = v, isSolid = i}
+  Body { collider = c, mass = val, velocity = v, isSolid = i }
 
 setVelocity :: Force -> Body -> Body
 setVelocity val (Body c m _ i) =
-  Body {collider = c, mass = m, velocity = val, isSolid = i}
+  Body { collider = c, mass = m, velocity = val, isSolid = i }
 
 setSolidity :: Bool -> Body -> Body
 setSolidity val (Body c m v _) =
-  Body {collider = c, mass = m, velocity = v, isSolid = val}
+  Body { collider = c, mass = m, velocity = v, isSolid = val }
 
-calcVelocity :: Object -> Vector
-calcVelocity (Object _ _ b _) = calcVelocity' b
-  where
-    calcVelocity' :: Body -> Vector
-    calcVelocity' (Body _ _ v _) = resultantForce v
+defaultRender = Render { sprite = Gloss.blank, name = "" }
 
-resultantForce :: Force -> Vector
-resultantForce [] = (0, 0)
-resultantForce [v] = v
-resultantForce (v:vs) = resultantForce' v vs
-  where
-    resultantForce' :: Vector -> [Vector] -> Vector
-    resultantForce' r []     = r
-    resultantForce' r (v:vs) = resultantForce' (vec r v) vs
+defaultSpace = Space { position = (0, 0), rotation = 0, size = (1, 1) }
 
-hasWeight val (Body c m v i) =
-  Body {collider = c, mass = m, velocity = v', isSolid = i}
-  where
-    v' = ((scalar m val) : v)
-
-scalar :: Float -> Vector -> Vector
-scalar f (x, y) = (f * x, f * y)
-
-vec :: Vector -> Vector -> Vector
-vec (x1, y1) (x2, y2) = (x1 * x2, y1 * y2)
+defaultBody =
+  Body { collider = Polygon [], mass = 0.0, velocity = [], isSolid = False }
