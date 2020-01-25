@@ -15,7 +15,6 @@ maintainer: example@example.com
 dependencies:
 - gloss
 - base >= 4.7 && < 5
-- reactive-banana
 name: frpeng
 version: 0.1.0.0
 extra-source-files:

@@ -14,6 +14,7 @@ import           Shapes
 
 initialState = [ball, lPaddle, rPaddle, topWall, bottomWall]
 
+createBall (Object r s (Body c m _ i) bh) v = Object r s (Body c m [v] i) bh
 
 -- Ball
 ballColor = Gloss.dark Gloss.yellow

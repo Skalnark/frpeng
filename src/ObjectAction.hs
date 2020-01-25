@@ -6,7 +6,6 @@ module ObjectAction
 where
 
 import qualified Graphics.Gloss                as Gloss
-import           Reactive.Banana.Combinators   as Banana
 
 import           Primitive
 import           Presets
