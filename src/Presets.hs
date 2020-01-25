@@ -5,10 +5,12 @@ module Presets
   , offset
   , nameOfTheGame
   , background
+  , emptyEvent
   )
 where
 
 import           Graphics.Gloss                as Gloss
+import Graphics.Gloss.Interface.Pure.Game (Event(EventResize))
 
 nameOfTheGame :: String
 nameOfTheGame = "New Game"
@@ -21,3 +23,5 @@ fps = 60
 
 background :: Gloss.Color
 background = Gloss.black
+
+emptyEvent = EventResize (fromIntegral width, fromIntegral height)

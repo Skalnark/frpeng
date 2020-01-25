@@ -5,11 +5,14 @@ module Primitive
   , Body(..)
   , Collider(..)
   , GameState
-  , Action
+  , Behavior
   , Sprite
   , Vector
   , Point
   , Force
+  , Input
+  , objects
+  , inputs
   , render
   , setName
   , setSprite
@@ -20,14 +23,15 @@ module Primitive
   , setVelocity
   , setMass
   , setSolidity
-  , act
+  , behave
   )
 where
 
 import qualified Graphics.Gloss                as Gloss
 import qualified Graphics.Gloss.Geometry.Angle as GMath
+import qualified Graphics.Gloss.Interface.Pure.Game as Pure
 
-type GameState = [Object]
+type GameState = (Input, [Object])
 
 type Vector = (Float, Float)
 
@@ -37,9 +41,11 @@ type Color = Gloss.Color
 
 type Sprite = Gloss.Picture
 
+type Input = Pure.Event
+
 type Force = [Vector]
 
-type Action = (Float -> Object -> Object)
+type Behavior = (Input -> Float -> Object -> Object)
 
 -- | The main game object
 data Object =
@@ -47,7 +53,7 @@ data Object =
     { renderer  :: Render
     , space     :: Space
     , body      :: Body
-    , actions :: [Action]
+    , behaviors :: [Behavior]
     }
 
 -- Rendering
@@ -83,16 +89,23 @@ data Collider
   | Elipse Float Float
   deriving (Show, Eq)
 
+
+inputs :: GameState -> Input
+inputs (e, g) = e
+
+objects :: GameState -> [Object]
+objects (e, g) = g
+
 render :: Object -> Sprite
 render (Object (Render sp _) (Space (px, py) rot (sx, sy)) b bh) =
   Gloss.translate px py (Gloss.rotate rot (Gloss.scale sx sy sp))
 
-act :: Float -> Object -> Object
-act sec (Object r s bd bh) = act' sec bh (Object r s bd bh)
+behave :: Input -> Float -> Object -> Object
+behave input sec (Object r s bd bh) = behave' input sec bh (Object r s bd bh)
  where
-  act' :: Float -> [Action] -> Object -> Object
-  act' sec []       obj = obj
-  act' sec (b : bs) obj = act' sec bs (b sec obj)
+  behave' :: Input -> Float -> [Behavior] -> Object -> Object
+  behave' input sec []       obj = obj
+  behave' input sec (b : bs) obj = behave' input sec bs (b input sec obj)
 
 setName :: String -> Render -> Render
 setName val (Render s _) = Render { sprite = s, name = val }
@@ -115,11 +128,11 @@ shear (x1, y1) (Space p r (x, y)) = Space { position = p
   where s = (x * x1, y * y1)
 
 resize :: Float -> Space -> Space
-resize factor (Space p r (x, y)) = Space { position = p
+resize fbehaveor (Space p r (x, y)) = Space { position = p
                                          , rotation = r
                                          , size     = s
                                          }
-  where s = (factor * x, factor * y)
+  where s = (fbehaveor * x, fbehaveor * y)
 
 setCollider :: Collider -> Body -> Body
 setCollider val (Body _ m v i) =

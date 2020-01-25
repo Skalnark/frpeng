@@ -12,7 +12,7 @@ import           Renderer
 import           Shapes
 
 
-initialState = [ball, lPaddle, rPaddle, topWall, bottomWall]
+initialState = (emptyEvent, [ball, lPaddle, rPaddle, topWall, bottomWall])
 
 createBall (Object r s (Body c m _ i) bh) v = Object r s (Body c m [v] i) bh
 
@@ -34,7 +34,7 @@ ball = Object
                     , velocity = [(45.0, 45.0)]
                     , isSolid  = True
                     }
-  , actions  = [translate]
+  , behaviors  = [translate, invert]
   }
 
 -- Paddles
@@ -56,7 +56,7 @@ lPaddle = Object
                     , velocity = [(0.0, 0.0)]
                     , isSolid  = True
                     }
-  , actions  = []
+  , behaviors  = []
   }
 
 rPaddle = Object
@@ -74,7 +74,7 @@ rPaddle = Object
                     , velocity = [(0.0, 0.0)]
                     , isSolid  = True
                     }
-  , actions  = []
+  , behaviors  = []
   }
 
 -- Walls
@@ -94,7 +94,7 @@ topWall = Object
                     , velocity = [(0.0, 0.0)]
                     , isSolid  = True
                     }
-  , actions  = []
+  , behaviors  = []
   }
 
 bottomWall = Object
@@ -112,5 +112,5 @@ bottomWall = Object
                     , velocity = [(0.0, 0.0)]
                     , isSolid  = True
                     }
-  , actions  = []
+  , behaviors  = []
   }

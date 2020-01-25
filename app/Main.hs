@@ -17,9 +17,9 @@ import           GameObject
 import           Primitive
 
 main :: IO ()
-main = do PureGame.play window background fps initialState renderize events update
+main = PureGame.play window background fps initialState renderize events update
 
 
 
-events :: PureGame.Event -> GameState -> GameState
-events _ g = g
+events :: Input -> GameState -> GameState
+events newInput (_, obj) = (newInput, obj)
