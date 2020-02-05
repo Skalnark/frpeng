@@ -22,4 +22,4 @@ main = PureGame.play window background fps initialState renderize events update
 
 
 events :: Input -> GameState -> GameState
-events newInput (_, obj) = (newInput, obj)
+events _ game = game
