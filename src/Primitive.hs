@@ -1,5 +1,3 @@
-{-# LANGUAGE Arrows #-}
-
 module Primitive
   ( Object(..)
   , Collider(..)
@@ -15,9 +13,10 @@ where
 
 import qualified Graphics.Gloss                as Gloss
 import qualified Graphics.Gloss.Geometry.Angle as GMath
-import qualified Graphics.Gloss.Interface.Pure.Game as Pure
-import Graphics.Gloss.Interface.FRP.Yampa
-import FRP.Yampa
+import qualified Graphics.Gloss.Interface.Pure.Game
+                                               as Pure
+import           Graphics.Gloss.Interface.FRP.Yampa
+import qualified FRP.Yampa                     as Yampa
 
 type GameState = (Float, [Object])
 
@@ -34,12 +33,19 @@ type Input = Pure.Event
 type Name = String
 
 type Position = Vector
- 
+
 type Mass = Float
 
 type Velocity = Vector
 
-data Event a
+data Event = Input | UserEvent | None
+
+data UserEvent = EventSprite (String, Sprite)
+               | EventName (String, String)
+               | EventPosition (String, Position)
+               | EventCollider (String, Collider)
+               | EventMass (String, Mass)
+               | EventVelocity (String, Velocity)
 
 newtype Behavior a = Behavior(Float -> (a, Behavior a))
 
@@ -62,4 +68,3 @@ data Collider
 
 render :: Object -> Sprite
 render (Object s _ (x, y) _ _ _) = Gloss.translate x y s
- 
