@@ -1,8 +1,8 @@
-resolver: lts-14.16
+resolver: lts-15.1
 
 packages:
+- yampa-gloss
 - .
 extra-deps:
 - Yampa-0.13.1@sha256:4612a2646c27bcd3ac55c90dbc34249303e28aa5b3bc3e0c6fa9ce58b889843c,5436
-- yampa-gloss-0.2@sha256:0c4608397bc06fb364b845759a976b662a097ce4c304aca19ed508336f38fda9,1822
 - simple-affine-space-0.1@sha256:09e582f2e12ce9feb251cbdacec57fa1f4a838ec63928026d98b758e89f9abd7,1931

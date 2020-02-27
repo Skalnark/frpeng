@@ -1,14 +1,21 @@
-module Renderer (renderize, update, window) where
+module Renderer (playTheGame) where
 
-import Primitive
-import Graphics.Gloss as G
 import Presets
+import Types hiding (Event, SF)
+import Input
+
+import Control.Arrow ((>>>))
+import Graphics.Gloss as G
+import Graphics.Gloss.Interface.FRP.Yampa (playYampa)
+import FRP.Yampa (SF, Event)
 
 window :: G.Display
 window = G.InWindow nameOfTheGame (width, height) (offset, offset)
 
-renderize :: GameState -> Picture
-renderize (time, obj) = G.pictures $ map Primitive.render obj
-
-update :: Float -> GameState -> GameState
-update seconds (time, obj) = (seconds, obj)
+playTheGame :: SF GameInput (GameState e)
+    -> SF (GameState e) Picture
+    -> IO ()
+playTheGame update render = playYampa window background fps mainSF
+  where
+    mainSF :: SF (Event Input) Picture
+    mainSF = getInput >>> update >>> render

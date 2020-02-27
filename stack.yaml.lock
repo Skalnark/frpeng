@@ -12,13 +12,6 @@ packages:
   original:
     hackage: Yampa-0.13.1@sha256:4612a2646c27bcd3ac55c90dbc34249303e28aa5b3bc3e0c6fa9ce58b889843c,5436
 - completed:
-    hackage: yampa-gloss-0.2@sha256:0c4608397bc06fb364b845759a976b662a097ce4c304aca19ed508336f38fda9,1822
-    pantry-tree:
-      size: 344
-      sha256: e664a0baeebd7b21d85fa72ca8e89edfe94a467b3ceac4b940f7bca2fe4b1adb
-  original:
-    hackage: yampa-gloss-0.2@sha256:0c4608397bc06fb364b845759a976b662a097ce4c304aca19ed508336f38fda9,1822
-- completed:
     hackage: simple-affine-space-0.1@sha256:09e582f2e12ce9feb251cbdacec57fa1f4a838ec63928026d98b758e89f9abd7,1931
     pantry-tree:
       size: 696
@@ -27,7 +20,7 @@ packages:
     hackage: simple-affine-space-0.1@sha256:09e582f2e12ce9feb251cbdacec57fa1f4a838ec63928026d98b758e89f9abd7,1931
 snapshots:
 - completed:
-    size: 524804
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/16.yaml
-    sha256: 4d1519a4372d051d47a5eae2241cf3fb54e113d7475f89707ddb6ec06add2888
-  original: lts-14.16
+    size: 489011
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/15/1.yaml
+    sha256: d4ecc42b7125d68e4c3c036a08046ad0cd02ae0d9efbe3af2223a00ff8cc16f3
+  original: lts-15.1

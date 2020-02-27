@@ -5,7 +5,7 @@ import qualified Graphics.Gloss                as Gloss
 
 import Graphics.Gloss.Interface.Pure.Game hiding (Vector, translate, rotate, scale)
 
-import           Primitive
+import           Types
 import           Presets
 
 scalar :: Float -> Vector -> Vector
