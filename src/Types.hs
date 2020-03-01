@@ -1,6 +1,5 @@
 module Types
   ( Collider(..)
-  , GameState(..)
   , Sprite
   , Vector
   , Point
@@ -18,10 +17,6 @@ import qualified Graphics.Gloss.Interface.Pure.Game as Pure
 import qualified Graphics.Gloss.Interface.FRP.Yampa as YampaI
 import FRP.Yampa
 
-data GameState v = GameState { var     :: Event v
-                             , sprites :: [(GameState v) -> Gloss.Picture]
-                             }
-
 type Vector = (Float, Float)
 
 type Point = (Float, Float)
@@ -30,17 +25,11 @@ type Color = Gloss.Color
 
 type Sprite = Gloss.Picture
 
-type Name = String
-
-type Position = Vector
-
-type Mass = Float
-
-type Velocity = Vector
-
 type Input = YampaI.Input
 
-data Attribute = Name | Position | Collider | Mass | Velocity
+type GameObject input output = SF input output
+
+type ObjectState s = s
 
 data Collider
   = Polygon [Point]
@@ -49,7 +38,7 @@ data Collider
 
 type GameInput = Event Key
 
-data KeyState = IsPressed | IsReleased | KeyDown | KeyUp
+data KeyState = IsPressed | IsReleased | KeyDown | KeyUp | None
 
 data Key = Key { keyF1 :: KeyState
                , keyF2 :: KeyState
@@ -75,7 +64,7 @@ data Key = Key { keyF1 :: KeyState
                , keyPAD9 :: KeyState
                , keyMINUS :: KeyState
                , keyPLUS :: KeyState
-               , keyTAB  :: KeyState
+               , keyTAB :: KeyState
                , keyESC :: KeyState
                , keyHOME :: KeyState
                , keyPGUP :: KeyState

@@ -12,10 +12,18 @@ import FRP.Yampa (SF, Event)
 window :: G.Display
 window = G.InWindow nameOfTheGame (width, height) (offset, offset)
 
-playTheGame :: SF GameInput (GameState e)
-    -> SF (GameState e) Picture
-    -> IO ()
-playTheGame update render = playYampa window background fps mainSF
+--playTheGame :: ge
+  --          -> SF GameInput ge
+    --        -> SF ge Picture
+      --      -> IO ()
+playTheGame igs update render = playYampa window background fps mainSF
   where
-    mainSF :: SF (Event Input) Picture
-    mainSF = getInput >>> update >>> render
+    --mainSF :: SF (Event Input) Picture
+    mainSF = let first = arrPrim (\_ -> igs) &&& getInput 
+                 second = (\c -> (constant (updateKeyboard c)) >>> update)
+              in render <<< dSwitch first second
+
+-- drpSwitch :: Functor col
+--              => (forall sf. a -> col sf -> col (b, sf))
+--              -> col (SF b c)
+--              -> SF (a, Event (col (SF b c) -> col (SF b c))) (col c)

@@ -1,10 +1,84 @@
-module Input (getInput, updateKeyboard) where
+module Input (getInput, updateKeyboard, keyboard) where
 
   import qualified Graphics.Gloss.Interface.Pure.Game as G
   
   import Types
-  
-  keyboard = Key{}
+
+  keyboard = Key{keyF1 = None
+               , keyF2 = None
+               , keyF3 = None
+               , keyF4 = None
+               , keyF5 = None
+               , keyF6 = None
+               , keyF7 = None
+               , keyF8 = None
+               , keyF9 = None
+               , keyF10 = None
+               , keyF11 = None
+               , keyF12 = None
+               , keyPAD0 = None
+               , keyPAD1 = None
+               , keyPAD2 = None
+               , keyPAD3 = None
+               , keyPAD4 = None
+               , keyPAD5 = None
+               , keyPAD6 = None
+               , keyPAD7 = None
+               , keyPAD8 = None
+               , keyPAD9 = None
+               , keyMINUS = None
+               , keyPLUS = None
+               , keyTAB = None
+               , keyESC = None
+               , keyHOME = None
+               , keyPGUP = None
+               , keyPGDOWN = None
+               , keyINSERT = None
+               , keyDELETE = None
+               , keyENTER = None
+               , keyBACKSPACE = None
+               , keyLCTRL = None
+               , keyRCTRL = None
+               , keyLALT = None
+               , keyRALT = None
+               , keyLSHIFT = None
+               , keyRSHIFT = None
+               , keySPACE = None
+               , keyUP = None
+               , keyDOWN = None
+               , keyLEFT = None
+               , keyRIGHT = None
+               , keyA = None
+               , keyB = None
+               , keyC = None
+               , keyD = None
+               , keyE = None
+               , keyF = None
+               , keyG = None
+               , keyH = None
+               , keyI = None
+               , keyJ = None
+               , keyK = None
+               , keyL = None
+               , keyM = None
+               , keyN = None
+               , keyO = None
+               , keyP = None
+               , keyQ = None
+               , keyR = None
+               , keyS = None
+               , keyT = None
+               , keyU = None
+               , keyV = None
+               , keyW = None
+               , keyX = None
+               , keyY = None
+               , keyZ = None
+               , keyLMOUSE = None
+               , keyRMOUSE = None
+               , keyMIDMOUSE = None
+               , keyWHEELUP = None
+               , keyWHEELDOWN = None}
 
   getInput :: SF (Event Input) GameInput
   getInput = arr $ \event ->
@@ -127,15 +201,17 @@ module Input (getInput, updateKeyboard) where
       Event (G.EventKey (G.Char 'X') G.Down _ _) -> event `tag` keyboard{keyX = KeyDown}
       Event (G.EventKey (G.Char 'Y') G.Down _ _) -> event `tag` keyboard{keyY = KeyDown}
       Event (G.EventKey (G.Char 'Z') G.Down _ _) -> event `tag` keyboard{keyZ = KeyDown}
+      _ -> noEvent
 
   updateState:: KeyState -> KeyState
   updateState KeyDown = IsPressed
   updateState KeyUp   = IsReleased
+  updateState None    = IsReleased
   updateState s = s
 
-  updateKeyboard :: SF GameInput GameInput
-  updateKeyboard = arr $ \key -> 
-    key `tag` keyboard
+  updateKeyboard :: Key -> GameInput
+  updateKeyboard = \key -> 
+               Event key
                {
                  keyF1 = updateState (keyF1 keyboard)
                , keyF2 = updateState (keyF2 keyboard)
