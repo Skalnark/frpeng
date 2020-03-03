@@ -15,59 +15,30 @@ import           GameObject
 import           Types
 import           Input
 
-data GS = GS { var :: Values 
-             , spr :: [Object]}
+data GameState = GameState { keys :: Key
+                           , bPos :: Vector
+                           , bVel :: Vector}
 
-type Object = GameEvent -> Gloss.Picture
+type Object = GE -> Gloss.Picture
 
-data GameEvent = GE { kb :: Event Key
-                    , gs :: Event GS}
+type GE = Event GameState
 
-data Values = Val { ballColor :: Gloss.Color
-                  , ballSize  :: Float
-                  , ballPosition :: Vector
-                  , ballVelocity :: Vector
-                  }
+gs = Event GameState{keys = keyboard, bPos = (0.0, 0.0), bVel = (100.0, 70.0) }
 
-val :: Values
-val = Val { ballColor    = Gloss.blue
-          , ballSize     = 25.0
-          , ballPosition = (0.0, 0.0)
-          , ballVelocity = (10.0, 0.0)
-          }
+render :: SF GE Picture
+render = arr ball
 
-gameState = GS { var = val
-               , spr = [ball]
-               }
+update :: SF GameInput GE
+update = (arr $ \gi -> gs) >>> move
 
-gameEvents = GE { kb = Event keyboard
-                , gs = Event gameState}
-
-start = constant gameState
-
-update :: SF GameInput GameEvent
-update = (arr (\i -> GE{kb = i, gs = (Event gameState)})) >>> trnslt
-
-render :: SF GameEvent Picture
-render = arr $ (\ge -> render' ge)
+move :: SF GE GE
+move = arr (\(Event ge) -> (Event ge) `tag` ge{bPos = (move' (bPos ge) (bVel ge))})
   where
-    render' :: GameEvent -> Picture
-    render' ge = Gloss.pictures (map (\x -> x ge) (sp ge))
-    sp ge = spr (fromEvent (gs ge))
+    move' (x, y) (vx, vy) = (x + vx, y + vy)
 
-trnslt :: SF GameEvent GameEvent
-trnslt = arr (\(GE k g) -> (GE k (g' g)))
+ball:: Object
+ball = \(Event (GameState k p v)) -> trans p $ Gloss.Color Gloss.red $ Gloss.circle 20.0
   where
-    g' (Event g) = (Event g) `tag` g{var = (tfactor (var g)), spr =  (spr g) }
-    tfactor (Val c s (x, y) (v, u)) =  (Val c s (move x  v, move y u) (v, u))
-    move p v = p + v
+    trans (x, y) = Gloss.translate x y
 
-
-ball :: Object
-ball (GE k (Event g)) = translate (ballPosition v) $ Gloss.color (ballColor v) $ Gloss.circleSolid (ballSize v)
-  where
-    translate (x, y) =  Gloss.translate x y 
-    v = var g
-
-main :: IO ()
-main = playTheGame gameEvents update render
+main = playTheGame gs update render

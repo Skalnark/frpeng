@@ -209,8 +209,8 @@ module Input (getInput, updateKeyboard, keyboard) where
   updateState None    = IsReleased
   updateState s = s
 
-  updateKeyboard :: Key -> GameInput
-  updateKeyboard = \key -> 
+  updateKeyboard :: Key -> GameInput -> GameInput
+  updateKeyboard key (Event keyboard) = 
                Event key
                {
                  keyF1 = updateState (keyF1 keyboard)

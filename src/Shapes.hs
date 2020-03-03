@@ -1,7 +1,6 @@
 module Shapes
   ( rectangle
   , solidCircle
-  , move
   )
 where
 

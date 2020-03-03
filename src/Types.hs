@@ -3,11 +3,12 @@ module Types
   , Sprite
   , Vector
   , Point
-  , GameInput
+  , GameInput(..)
   , Key(..)
   , KeyState(..)
   , Input
   , module FRP.Yampa
+  , Event(..)
   )
 where
 
