@@ -1,6 +1,5 @@
 module Types
   ( Collider(..)
-  , Sprite
   , Vector
   , Point
   , GameInput(..)
@@ -9,11 +8,11 @@ module Types
   , Input
   , module FRP.Yampa
   , Event(..)
+  , module Gloss
   )
 where
 
-import qualified Graphics.Gloss                     as Gloss
-import qualified Graphics.Gloss.Geometry.Angle      as GMath
+import Graphics.Gloss                     as Gloss hiding (translate, Event, KeyState, Point, Vector)
 import qualified Graphics.Gloss.Interface.Pure.Game as Pure
 import qualified Graphics.Gloss.Interface.FRP.Yampa as YampaI
 import FRP.Yampa
@@ -22,24 +21,16 @@ type Vector = (Float, Float)
 
 type Point = (Float, Float)
 
-type Color = Gloss.Color
-
-type Sprite = Gloss.Picture
-
 type Input = YampaI.Input
 
-type GameObject input output = SF input output
-
-type ObjectState s = s
-
 data Collider
-  = Polygon [Point]
-  | Circle Float
-  | Elipse Float Float
+  = Poly [Point]
+  | Circ Point Float
+  | Elip Point Float Float
 
 type GameInput = Event Key
 
-data KeyState = IsPressed | IsReleased | KeyDown | KeyUp | None
+data KeyState = IsPressed | IsReleased | KeyDown | KeyUp | None deriving (Eq)
 
 data Key = Key { keyF1 :: KeyState
                , keyF2 :: KeyState
@@ -116,4 +107,4 @@ data Key = Key { keyF1 :: KeyState
                , keyMIDMOUSE :: KeyState
                , keyWHEELUP :: KeyState
                , keyWHEELDOWN :: KeyState
-               }
+               } deriving (Eq)

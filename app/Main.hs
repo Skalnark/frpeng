@@ -4,7 +4,6 @@ import           System.IO
 import           Data.IORef
 import           System.Random (newStdGen, StdGen)
 import           Control.Arrow
-import qualified Graphics.Gloss                as Gloss
 import           Graphics.Gloss.Data.Picture (Picture(Blank))
 
 import           Renderer
@@ -14,31 +13,39 @@ import           Presets
 import           GameObject
 import           Types
 import           Input
+import           Facility
 
-data GameState = GameState { keys :: Key
-                           , bPos :: Vector
-                           , bVel :: Vector}
+data GameState = GameState { bPos   :: !Vector
+                           , bVel   :: !Vector
+                           , bcolor :: Color}
 
-type Object = GE -> Gloss.Picture
+igs = GameState { bPos = (0.0, 0.0)
+                , bVel = (0.5, 0.0)
+                , bcolor = green}
 
-type GE = Event GameState
+wall :: Vector -> Color -> Picture
+wall p c = translate p $ Color c $ rectangleSolid 900 30
 
-gs = Event GameState{keys = keyboard, bPos = (0.0, 0.0), bVel = (100.0, 70.0) }
-
-render :: SF GE Picture
-render = arr ball
-
-update :: SF GameInput GE
-update = (arr $ \gi -> gs) >>> move
-
-move :: SF GE GE
-move = arr (\(Event ge) -> (Event ge) `tag` ge{bPos = (move' (bPos ge) (bVel ge))})
+ball :: GameState -> Picture
+ball gs = trans (bPos gs) (bVel gs) $ Color (bcolor gs) $ circleSolid 20.0
   where
-    move' (x, y) (vx, vy) = (x + vx, y + vy)
+    trans p v= translate (sumVec p v)
 
-ball:: Object
-ball = \(Event (GameState k p v)) -> trans p $ Gloss.Color Gloss.red $ Gloss.circle 20.0
+moveBall :: (GameState, Key) -> (GameState, Key)
+moveBall (gs, key) = (gs{bPos = move' gs}, key)
   where
-    trans (x, y) = Gloss.translate x y
+    move' (GameState p v b) = sumVec p v
 
-main = playTheGame gs update render
+ballColor :: (GameState, Key) -> (GameState, Key)
+ballColor (gs, key) = case keySPACE key of
+                      IsReleased -> (gs{bcolor = red}, key)
+                      IsPressed  -> (gs{bcolor = green}, key)
+                      _ -> (gs, key)
+
+update :: (GameState, Key) -> (GameState, Key)
+update (gs, key) = moveBall $ ballColor (gs, key)
+
+render :: GameState -> Picture
+render gs = pictures [ball gs, wall (0, 300) white, wall (0, -300) white]
+
+main = playTheGame (igs, keyboard) update render
