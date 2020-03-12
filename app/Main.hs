@@ -13,39 +13,49 @@ import           Presets
 import           GameObject
 import           Types
 import           Input
-import           Facility
+import           Physics
 
 data GameState = GameState { bPos   :: !Vector
                            , bVel   :: !Vector
-                           , bcolor :: Color}
+                           , bColor :: Color}
 
+igs :: GameState
 igs = GameState { bPos = (0.0, 0.0)
-                , bVel = (0.5, 0.0)
-                , bcolor = green}
+                , bVel = (-5.0, 5.0)
+                , bColor = green
+}
 
 wall :: Vector -> Color -> Picture
 wall p c = translate p $ Color c $ rectangleSolid 900 30
 
+ballRadius = 20.0
+
 ball :: GameState -> Picture
-ball gs = trans (bPos gs) (bVel gs) $ Color (bcolor gs) $ circleSolid 20.0
+ball gs = translate (bPos gs) $ Color (bColor gs) $ circleSolid ballRadius
+
+ballScript :: (GameState, Key) -> (GameState, Key)
+ballScript (gs, key) = (gs{ bPos = move gs
+                          , bColor = newC (gs, key)
+                          , bVel = bounce gs
+                          }
+                        , key)
   where
-    trans p v= translate (sumVec p v)
+    move gs = sumVec (bPos gs) (bVel gs)
+    
+    newC (gs, key) = case keySPACE key of
+                      Released -> red
+                      Pressed  -> green
+                      _ -> bColor gs
 
-moveBall :: (GameState, Key) -> (GameState, Key)
-moveBall (gs, key) = (gs{bPos = move' gs}, key)
-  where
-    move' (GameState p v b) = sumVec p v
+    bounce gs = screenBounce (bPos gs) (bVel gs) (fromIntegral width) (fromIntegral height)
 
-ballColor :: (GameState, Key) -> (GameState, Key)
-ballColor (gs, key) = case keySPACE key of
-                      IsReleased -> (gs{bcolor = red}, key)
-                      IsPressed  -> (gs{bcolor = green}, key)
-                      _ -> (gs, key)
-
-update :: (GameState, Key) -> (GameState, Key)
-update (gs, key) = moveBall $ ballColor (gs, key)
+update :: SF (GameState, Key) (GameState, Key)
+update = arr $ \(gs, key) -> ballScript (gs, key)
 
 render :: GameState -> Picture
-render gs = pictures [ball gs, wall (0, 300) white, wall (0, -300) white]
+render gs = pictures [ ball gs
+                     --, wall (0, 300) white
+                     --, wall (0, -300) white
+                     ]
 
 main = playTheGame (igs, keyboard) update render

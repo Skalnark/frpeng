@@ -16,24 +16,28 @@ window :: G.Display
 window = G.InWindow nameOfTheGame (width, height) (offset, offset)
 
 playTheGame :: (gs, Key)
-            -> ((gs, Key) -> (gs, Key))
+            -> SF (gs, Key) (gs, Key)
             -> (gs -> Picture)
             -> IO ()
 playTheGame igs update render = playYampa window background fps mainSF
   where
     mainLoop :: (gs, Key)
-             -> ((gs, Key) -> (gs, Key))
+             -> SF (gs, Key) (gs, Key)
              -> SF (Event Input) (gs, Key)
     mainLoop state update = proc input -> do
       rec currentState <- dHold state -< gameUpdated
-          gameUpdated <- arr $ Event . update -< (getInput (updateKey currentState) input)
+          gameUpdated <- Event ^<< update 
+                      -< (getInput (updateKey currentState) input)
+
       returnA -< currentState
 
-    endGame :: SF (gs, Key) (Event (gs, Key))
-    endGame = arr $  \(gs, key) -> if keyESC key == IsPressed
+    restart :: SF (gs, Key) (Event (gs, Key))
+    restart = arr $  \(gs, key) -> if keyESC key == Pressed
                               then Event (gs, keyboard)
                               else NoEvent
-    game i  = dSwitch (mainLoop i update >>> (identity &&& endGame))
-                       (\_ -> mainLoop i update)
+    
+    game i  = switch (mainLoop i update >>> (identity &&& restart))
+                       (\_ -> game i)
+
     mainSF :: SF (Event Input) Picture
     mainSF  = game igs >>> arr fst >>> arr render

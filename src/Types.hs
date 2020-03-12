@@ -24,13 +24,12 @@ type Point = (Float, Float)
 type Input = YampaI.Input
 
 data Collider
-  = Poly [Point]
-  | Circ Point Float
-  | Elip Point Float Float
+  = Rec Point Float Float
+  | Crc Point Float
 
 type GameInput = Event Key
 
-data KeyState = IsPressed | IsReleased | KeyDown | KeyUp | None deriving (Eq)
+data KeyState = Pressed | Released | Down | Up | None deriving (Eq)
 
 data Key = Key { keyF1 :: KeyState
                , keyF2 :: KeyState
