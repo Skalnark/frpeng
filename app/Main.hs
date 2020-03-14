@@ -33,12 +33,12 @@ ballRadius = 20.0
 ball :: GameState -> Picture
 ball gs = translate (bPos gs) $ Color (bColor gs) $ circleSolid ballRadius
 
-ballScript :: (GameState, Key) -> (GameState, Key)
-ballScript (gs, key) = (gs{ bPos = move gs
-                          , bColor = newC (gs, key)
-                          , bVel = bounce gs
-                          }
-                        , key)
+ballScript :: SF (GameState, Key) (GameState, Key)
+ballScript = arr $ \(gs, key) -> (gs{ bPos = move gs
+                                    , bColor = newC (gs, key)
+                                    , bVel = bounce gs
+                                    }
+                                 , key)
   where
     move gs = sumVec (bPos gs) (bVel gs)
     
@@ -50,7 +50,7 @@ ballScript (gs, key) = (gs{ bPos = move gs
     bounce gs = screenBounce (bPos gs) (bVel gs) (fromIntegral width) (fromIntegral height)
 
 update :: SF (GameState, Key) (GameState, Key)
-update = arr $ \(gs, key) -> ballScript (gs, key)
+update = ballScript
 
 render :: GameState -> Picture
 render gs = pictures [ ball gs
