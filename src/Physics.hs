@@ -1,8 +1,11 @@
-module Physics(sumVec, dProd, move, translate, sProd, distance, colliding, screenBounce)
+module Physics(sumVec, dProd, move, translate, sProd, distance, colliding, screenBounce, fVec)
   where
 
   import Types
   import qualified Graphics.Gloss as Gloss
+
+  fVec :: (Float -> Float -> Float) -> Vector -> Vector -> Vector
+  fVec f (x, y) (u, v) = (f x u, f y v)
 
   sProd :: Float -> Vector -> Vector
   sProd f (x, y) = (f * x, f * y)

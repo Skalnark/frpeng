@@ -24,12 +24,12 @@ playTheGame igs update render = playYampa window background fps mainSF
     mainLoop :: (gs, Key)
              -> SF (gs, Key) (gs, Key)
              -> SF (Event Input) (gs, Key)
-    mainLoop state update = proc input -> do
-      rec currentState <- dHold state -< gameUpdated
-          gameUpdated <- Event ^<< update 
-                      -< (getInput (updateKey currentState) input)
+    mainLoop initial update = proc input -> do
+      rec cs       <- dHold initial    -< newGs
+          newGs    <- Event ^<< update -< newInput
+          newInput <- getInput         -< (cs, input)
 
-      returnA -< currentState
+      returnA -< cs
 
     restart :: SF (gs, Key) (Event (gs, Key))
     restart = arr $  \(gs, key) -> if keyESC key == Pressed
@@ -40,4 +40,4 @@ playTheGame igs update render = playYampa window background fps mainSF
                        (\_ -> game i)
 
     mainSF :: SF (Event Input) Picture
-    mainSF  = game igs >>> arr fst >>> arr render
+    mainSF  = game igs >>^ arr fst >>> arr render

@@ -19,7 +19,7 @@ nameOfTheGame = "New Game"
 width, height, offset, fps :: Int
 width = 800
 height = 600
-offset = 10
+offset = 0
 fps = 60
 
 background :: Gloss.Color

@@ -1,5 +1,5 @@
 {-# LANGUAGE Arrows #-}
-module Input (getInput, updateKey, keyboard) where
+module Input (getInput, keyboard) where
 
   import qualified Graphics.Gloss.Interface.Pure.Game as G
   
@@ -81,8 +81,10 @@ module Input (getInput, updateKey, keyboard) where
                , keyWHEELUP = None
                , keyWHEELDOWN = None}
 
-  getInput :: (gs, Key) -> (Event Input) -> (gs, Key)
-  getInput (gs, kb) = arr $ \event ->
+  getInput :: SF ((gs, Key), (Event Input)) (gs, Key)
+  getInput = arr $ \(state, event) ->
+    let (gs, kb) = updateKey state
+    in
     case event of
       Event (G.EventKey (G.SpecialKey G.KeyF1) G.Up _ _) -> (gs, kb{keyF1 =  Up}) 
       Event (G.EventKey (G.SpecialKey G.KeyF2) G.Up _ _) -> (gs, kb{keyF2 =  Up})
@@ -116,6 +118,7 @@ module Input (getInput, updateKey, keyboard) where
       Event (G.EventKey (G.SpecialKey G.KeyShiftL) G.Up _ _) -> (gs, kb{keyLSHIFT =  Up})
       Event (G.EventKey (G.SpecialKey G.KeyShiftR) G.Up _ _) -> (gs, kb{keyRSHIFT =  Up})
       Event (G.EventKey (G.SpecialKey G.KeySpace) G.Up _ _) -> (gs, kb{keySPACE =  Up})
+
       Event (G.EventKey (G.Char 'A') G.Up _ _) -> (gs, kb{keyA =  Up})
       Event (G.EventKey (G.Char 'B') G.Up _ _) -> (gs, kb{keyB =  Up})
       Event (G.EventKey (G.Char 'C') G.Up _ _) -> (gs, kb{keyC =  Up})
@@ -142,6 +145,33 @@ module Input (getInput, updateKey, keyboard) where
       Event (G.EventKey (G.Char 'X') G.Up _ _) -> (gs, kb{keyX =  Up})
       Event (G.EventKey (G.Char 'Y') G.Up _ _) -> (gs, kb{keyY =  Up})
       Event (G.EventKey (G.Char 'Z') G.Up _ _) -> (gs, kb{keyZ =  Up})
+
+      Event (G.EventKey (G.Char 'a') G.Up _ _) -> (gs, kb{keyA = Up})
+      Event (G.EventKey (G.Char 'b') G.Up _ _) -> (gs, kb{keyB = Up})
+      Event (G.EventKey (G.Char 'c') G.Up _ _) -> (gs, kb{keyC = Up})
+      Event (G.EventKey (G.Char 'd') G.Up _ _) -> (gs, kb{keyD = Up})
+      Event (G.EventKey (G.Char 'e') G.Up _ _) -> (gs, kb{keyE = Up})
+      Event (G.EventKey (G.Char 'f') G.Up _ _) -> (gs, kb{keyF = Up})
+      Event (G.EventKey (G.Char 'g') G.Up _ _) -> (gs, kb{keyG = Up})
+      Event (G.EventKey (G.Char 'h') G.Up _ _) -> (gs, kb{keyH = Up})
+      Event (G.EventKey (G.Char 'i') G.Up _ _) -> (gs, kb{keyI = Up})
+      Event (G.EventKey (G.Char 'j') G.Up _ _) -> (gs, kb{keyJ = Up})
+      Event (G.EventKey (G.Char 'k') G.Up _ _) -> (gs, kb{keyK = Up})
+      Event (G.EventKey (G.Char 'l') G.Up _ _) -> (gs, kb{keyL = Up})
+      Event (G.EventKey (G.Char 'm') G.Up _ _) -> (gs, kb{keyM = Up})
+      Event (G.EventKey (G.Char 'n') G.Up _ _) -> (gs, kb{keyN = Up})
+      Event (G.EventKey (G.Char 'o') G.Up _ _) -> (gs, kb{keyO = Up})
+      Event (G.EventKey (G.Char 'p') G.Up _ _) -> (gs, kb{keyP = Up})
+      Event (G.EventKey (G.Char 'q') G.Up _ _) -> (gs, kb{keyQ = Up})
+      Event (G.EventKey (G.Char 'r') G.Up _ _) -> (gs, kb{keyR = Up})
+      Event (G.EventKey (G.Char 's') G.Up _ _) -> (gs, kb{keyS = Up})
+      Event (G.EventKey (G.Char 't') G.Up _ _) -> (gs, kb{keyT = Up})
+      Event (G.EventKey (G.Char 'u') G.Up _ _) -> (gs, kb{keyU = Up})
+      Event (G.EventKey (G.Char 'v') G.Up _ _) -> (gs, kb{keyV = Up})
+      Event (G.EventKey (G.Char 'w') G.Up _ _) -> (gs, kb{keyW = Up})
+      Event (G.EventKey (G.Char 'x') G.Up _ _) -> (gs, kb{keyX = Up})
+      Event (G.EventKey (G.Char 'y') G.Up _ _) -> (gs, kb{keyY = Up})
+      Event (G.EventKey (G.Char 'z') G.Up _ _) -> (gs, kb{keyZ = Up})
 
       Event (G.EventKey (G.SpecialKey G.KeyF1) G.Down _ _) -> (gs, kb{keyF1 = Down}) 
       Event (G.EventKey (G.SpecialKey G.KeyF2) G.Down _ _) -> (gs, kb{keyF2 = Down})
@@ -202,8 +232,34 @@ module Input (getInput, updateKey, keyboard) where
       Event (G.EventKey (G.Char 'X') G.Down _ _) -> (gs, kb{keyX = Down})
       Event (G.EventKey (G.Char 'Y') G.Down _ _) -> (gs, kb{keyY = Down})
       Event (G.EventKey (G.Char 'Z') G.Down _ _) -> (gs, kb{keyZ = Down})
+      
+      Event (G.EventKey (G.Char 'a') G.Down _ _) -> (gs, kb{keyA = Down})
+      Event (G.EventKey (G.Char 'b') G.Down _ _) -> (gs, kb{keyB = Down})
+      Event (G.EventKey (G.Char 'c') G.Down _ _) -> (gs, kb{keyC = Down})
+      Event (G.EventKey (G.Char 'd') G.Down _ _) -> (gs, kb{keyD = Down})
+      Event (G.EventKey (G.Char 'e') G.Down _ _) -> (gs, kb{keyE = Down})
+      Event (G.EventKey (G.Char 'f') G.Down _ _) -> (gs, kb{keyF = Down})
+      Event (G.EventKey (G.Char 'g') G.Down _ _) -> (gs, kb{keyG = Down})
+      Event (G.EventKey (G.Char 'h') G.Down _ _) -> (gs, kb{keyH = Down})
+      Event (G.EventKey (G.Char 'i') G.Down _ _) -> (gs, kb{keyI = Down})
+      Event (G.EventKey (G.Char 'j') G.Down _ _) -> (gs, kb{keyJ = Down})
+      Event (G.EventKey (G.Char 'k') G.Down _ _) -> (gs, kb{keyK = Down})
+      Event (G.EventKey (G.Char 'l') G.Down _ _) -> (gs, kb{keyL = Down})
+      Event (G.EventKey (G.Char 'm') G.Down _ _) -> (gs, kb{keyM = Down})
+      Event (G.EventKey (G.Char 'n') G.Down _ _) -> (gs, kb{keyN = Down})
+      Event (G.EventKey (G.Char 'o') G.Down _ _) -> (gs, kb{keyO = Down})
+      Event (G.EventKey (G.Char 'p') G.Down _ _) -> (gs, kb{keyP = Down})
+      Event (G.EventKey (G.Char 'q') G.Down _ _) -> (gs, kb{keyQ = Down})
+      Event (G.EventKey (G.Char 'r') G.Down _ _) -> (gs, kb{keyR = Down})
+      Event (G.EventKey (G.Char 's') G.Down _ _) -> (gs, kb{keyS = Down})
+      Event (G.EventKey (G.Char 't') G.Down _ _) -> (gs, kb{keyT = Down})
+      Event (G.EventKey (G.Char 'u') G.Down _ _) -> (gs, kb{keyU = Down})
+      Event (G.EventKey (G.Char 'v') G.Down _ _) -> (gs, kb{keyV = Down})
+      Event (G.EventKey (G.Char 'w') G.Down _ _) -> (gs, kb{keyW = Down})
+      Event (G.EventKey (G.Char 'x') G.Down _ _) -> (gs, kb{keyX = Down})
+      Event (G.EventKey (G.Char 'y') G.Down _ _) -> (gs, kb{keyY = Down})
+      Event (G.EventKey (G.Char 'z') G.Down _ _) -> (gs, kb{keyZ = Down})
       _ -> (gs, kb)
-
 
   updateState:: KeyState -> KeyState
   updateState Down = Pressed
