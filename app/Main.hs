@@ -1,5 +1,6 @@
 module Main where
 
+import           Prelude
 import           System.IO
 import           Data.IORef
 import           System.Random (newStdGen, StdGen)
@@ -26,7 +27,7 @@ data GameState = GameState { bPos    :: !Vector
 
 igs :: GameState
 igs = GameState { bPos = (0.0, 0.0)
-                , bVel = (0.0, 0.0)
+                , bVel = (5.0, 7.0)
                 , bColor = green
                 , p1Pos = (-360.0, 0.0)
                 , p2Pos = (360.0, 0.0)
@@ -137,11 +138,11 @@ drawScore gs = let p1 = p1Score gs
                             , translate (150, 120) $ scale 0.7 0.7 $ Color white $ Text (show p2)]
 
 update :: SF (GameState, Key) (GameState, Key)
-update =     ballScript 
-         >>> bounceBall 
+update =     bounceBall 
          >>> bouncePaddle 
          ^>> controlP1 
          >>> controlP2
+         >>> ballScript
          >>> score width
          >>> reset
 

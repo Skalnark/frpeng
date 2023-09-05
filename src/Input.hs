@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 module Input (getInput, keyboard) where
 
   import qualified Graphics.Gloss.Interface.Pure.Game as G
@@ -81,7 +80,7 @@ module Input (getInput, keyboard) where
                , keyWHEELUP = None
                , keyWHEELDOWN = None}
 
-  getInput :: SF ((gs, Key), (Event Input)) (gs, Key)
+  getInput :: SF ((gs, Key), Event Input) (gs, Key)
   getInput = arr $ \(state, event) ->
     let (gs, kb) = updateKey state
     in

@@ -28,7 +28,6 @@ playTheGame igs update render = playYampa window background fps mainSF
       rec cs       <- dHold initial    -< newGs
           newGs    <- Event ^<< update -< newInput
           newInput <- getInput         -< (cs, input)
-
       returnA -< cs
 
     restart :: SF (gs, Key) (Event (gs, Key))
@@ -36,8 +35,9 @@ playTheGame igs update render = playYampa window background fps mainSF
                               then Event (gs, keyboard)
                               else NoEvent
     
-    game i  = switch (mainLoop i update >>> (identity &&& restart))
-                       (\_ -> game i)
+    game :: (gs, Key) -> SF (gs, Key) (gs, Key) -> SF (Event Input) (gs, Key) 
+    game i update' = switch (mainLoop i update' >>> (identity &&& restart))
+                       (\_ -> game i update')
 
     mainSF :: SF (Event Input) Picture
-    mainSF  = game igs >>^ arr fst >>> arr render
+    mainSF  = game igs update >>^ arr fst >>> arr render
