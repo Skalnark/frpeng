@@ -21,10 +21,10 @@ playTheGame :: (gs, Key)
             -> IO ()
 playTheGame igs update render = playYampa window background fps mainSF
   where
-    mainLoop :: (gs, Key)
+    applyUpdate :: (gs, Key)
              -> SF (gs, Key) (gs, Key)
              -> SF (Event Input) (gs, Key)
-    mainLoop initial update = proc input -> do
+    applyUpdate initial update = proc input -> do
       rec cs       <- dHold initial    -< newGs
           newGs    <- Event ^<< update -< newInput
           newInput <- getInput         -< (cs, input)
@@ -35,9 +35,9 @@ playTheGame igs update render = playYampa window background fps mainSF
                               then Event (gs, keyboard)
                               else NoEvent
     
-    game :: (gs, Key) -> SF (gs, Key) (gs, Key) -> SF (Event Input) (gs, Key) 
-    game i update' = switch (mainLoop i update' >>> (identity &&& restart))
-                       (\_ -> game i update')
+    stateSwitch :: (gs, Key) -> SF (gs, Key) (gs, Key) -> SF (Event Input) (gs, Key) 
+    stateSwitch i update' = switch (applyUpdate i update' >>> (identity &&& restart))
+                       (\_ -> stateSwitch i update')
 
     mainSF :: SF (Event Input) Picture
-    mainSF  = game igs update >>^ arr fst >>> arr render
+    mainSF = stateSwitch igs update >>^ arr fst >>> arr render

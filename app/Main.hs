@@ -11,7 +11,6 @@ import           Renderer
 import           Shapes
 import           ObjectAction
 import           Presets
-import           GameObject
 import           Types
 import           Input
 import           Physics
