@@ -1,16 +1,16 @@
 module Presets
-  ( fps
-  , width
-  , height
-  , offset
-  , nameOfTheGame
-  , background
-  , emptyEvent
+  ( fps,
+    width,
+    height,
+    offset,
+    nameOfTheGame,
+    background,
+    emptyEvent,
   )
 where
 
-import           Graphics.Gloss                as Gloss
-import Graphics.Gloss.Interface.Pure.Game (Event(EventResize))
+import Graphics.Gloss as Gloss
+import Graphics.Gloss.Interface.Pure.Game (Event (EventResize))
 import Types
 
 nameOfTheGame :: String

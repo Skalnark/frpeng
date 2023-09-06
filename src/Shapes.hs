@@ -1,11 +1,11 @@
 module Shapes
-  ( rectangle
-  , solidCircle
+  ( rectangle,
+    solidCircle,
   )
 where
 
-import           Graphics.Gloss hiding (Vector)
-import           Types
+import Graphics.Gloss hiding (Vector)
+import Types
 
 type Width = Float
 
@@ -18,6 +18,5 @@ rectangle :: Float -> Float -> [Types.Point]
 rectangle w h =
   [(-w / 2, h / 2), (w / 2, h / 2), (w / 2, -h / 2), (-w / 2, -h / 2)]
 
-
 move :: Vector -> Picture -> Picture
-move (x, y) p = translate x y p
+move (x, y) = translate x y

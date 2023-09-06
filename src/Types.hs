@@ -14,7 +14,7 @@ where
 
 import Graphics.Gloss                     as Gloss hiding (translate, Event, KeyState, Point, Vector)
 import qualified Graphics.Gloss.Interface.Pure.Game as Pure
-import qualified Graphics.Gloss.Interface.FRP.Yampa as YampaI
+import qualified AdaptedYampaGloss as YampaI
 import FRP.Yampa
 
 type Vector = (Float, Float)
